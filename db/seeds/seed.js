@@ -1,6 +1,6 @@
 const db = require("../connection");
 const format = require("pg-format");
-const { convertTimestampToDate } = require("./utils");
+const { convertTimestampToDate, addArticleIDToComments } = require("./utils");
 
 const seed = ({ topicData, userData, articleData, commentData }) => {
   return db
@@ -23,8 +23,8 @@ const seed = ({ topicData, userData, articleData, commentData }) => {
     .then(() => {
       return createArticles(articleData);
     })
-    .then(() => {
-      return createComments(commentData);
+    .then(({ rows }) => {
+      return createComments(commentData, rows);
     });
 };
 
@@ -88,13 +88,18 @@ function createArticles(articleData) {
     });
 }
 
-function createComments(commentData) {
+function createComments(commentData, articleData) {
   return db
     .query(
       "CREATE TABLE comments (comment_id SERIAL PRIMARY KEY, article_id INT, body TEXT NOT NULL, votes INT DEFAULT 0, author VARCHAR, created_at TIMESTAMP DEFAULT NOW(), FOREIGN KEY (article_id) REFERENCES articles(article_id) ON DELETE CASCADE, FOREIGN KEY (author) REFERENCES users(username) ON DELETE CASCADE)"
     )
     .then(() => {
-      const formattedComments = commentData.map((comment) => {
+      const commentDataWithArticleID = addArticleIDToComments(
+        commentData,
+        articleData
+      );
+
+      const formattedComments = commentDataWithArticleID.map((comment) => {
         const newComment = convertTimestampToDate(comment);
         return [
           newComment.article_id,
@@ -105,7 +110,10 @@ function createComments(commentData) {
         ];
       });
       const insertQuery = format(
-        "INSERT INTO comments (article_id, body, votes, author, created_at) VALUES %L RETURNING *",
+        `INSERT INTO comments (
+        article_id, body, votes, author, created_at
+       ) 
+       VALUES %L RETURNING *`,
         formattedComments
       );
       return db.query(insertQuery);

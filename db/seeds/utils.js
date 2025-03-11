@@ -5,5 +5,13 @@ exports.convertTimestampToDate = ({ created_at, ...otherProperties }) => {
   return { created_at: new Date(created_at), ...otherProperties };
 };
 
-
-
+exports.addArticleIDToComments = (commentData, articleData) => {
+  const articleObj = {};
+  articleData.forEach((article) => {
+    articleObj[article.title] = article.article_id;
+  });
+  return commentData.map((comment) => {
+    comment.article_id = articleObj[comment.article_title];
+    return comment;
+  });
+};
