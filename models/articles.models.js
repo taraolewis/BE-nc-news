@@ -9,7 +9,6 @@ exports.fetchArticleByID = (article_id) => {
       [article_id]
     )
     .then(({ rows }) => {
-      console.log(rows);
       if (rows.length === 0) {
         return Promise.reject({ status: 404, msg: "article does not exist" });
       }
@@ -29,7 +28,6 @@ exports.fetchAllArticles = () => {
     ORDER BY articles.created_at DESC;`
     )
     .then(({ rows }) => {
-      console.log("hello");
       return rows;
     });
 };
