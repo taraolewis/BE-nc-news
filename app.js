@@ -10,6 +10,9 @@ const {
 } = require("./controllers/errors.controllers.js");
 const { getArticleByID } = require("./controllers/articles.controllers");
 const { getAllArticles } = require("./controllers/articles.controllers");
+const {
+  getCommentsFromArticleID,
+} = require("./controllers/comments.controllers");
 
 //app.use(express.json());
 
@@ -20,6 +23,8 @@ app.get("/api/topics", getTopics);
 app.get("/api/articles/:article_id", getArticleByID);
 
 app.get("/api/articles", getAllArticles);
+
+app.get("/api/articles/:article_id/comments", getCommentsFromArticleID);
 
 app.all("/*", handleNonExistantEndpoint);
 
