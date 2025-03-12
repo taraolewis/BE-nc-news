@@ -68,7 +68,7 @@ describe("GET /api/topics", () => {
           });
         });
     });
-    test("404: Responds with right status and error message for a valid but non-existent ID", () => {
+    test("404: Responds with 'article does not exist' for a valid but non-existent ID", () => {
       return request(app)
         .get("/api/articles/88")
         .expect(404)
@@ -76,7 +76,7 @@ describe("GET /api/topics", () => {
           expect(body.msg).toBe("article does not exist");
         });
     });
-    test("400: Responds with right status and error message for an invalid ID", () => {
+    test("400: Responds with 'Bad request' for an invalid ID", () => {
       return request(app)
         .get("/api/articles/not-an-article")
         .expect(400)
@@ -84,5 +84,46 @@ describe("GET /api/topics", () => {
           expect(body.msg).toBe("Bad request");
         });
     });
+  });
+});
+
+describe("GET /api/articles", () => {
+  test("200: Responds with an array of all articles", () => {
+    return request(app)
+      .get("/api/articles")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.articles.length).toBeGreaterThan(1);
+        body.articles.forEach((article) => {
+          expect(article).toMatchObject({
+            article_id: expect.any(Number),
+            title: expect.any(String),
+            author: expect.any(String),
+            topic: expect.any(String),
+            created_at: expect.any(String),
+            votes: expect.any(Number),
+            article_img_url: expect.any(String),
+            comment_count: expect.any(Number),
+          });
+        });
+      });
+  });
+  test("200: Articles are sorted by date in descending order", () => {
+    return request(app)
+      .get("/api/articles")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.articles).toBeSortedBy("created_at", { descending: true });
+      });
+  });
+  test("200: Articles do not include a body property", () => {
+    return request(app)
+      .get("/api/articles")
+      .expect(200)
+      .then(({ body }) => {
+        body.articles.forEach((article) => {
+          expect(article).not.toHaveProperty("body");
+        });
+      });
   });
 });

@@ -9,6 +9,7 @@ const {
   handleNonExistantEndpoint,
 } = require("./controllers/errors.controllers.js");
 const { getArticleByID } = require("./controllers/articles.controllers");
+const { getAllArticles } = require("./controllers/articles.controllers");
 
 //app.use(express.json());
 
@@ -17,6 +18,8 @@ app.get("/api", getEndpoints);
 app.get("/api/topics", getTopics);
 
 app.get("/api/articles/:article_id", getArticleByID);
+
+app.get("/api/articles", getAllArticles);
 
 app.all("/*", handleNonExistantEndpoint);
 
