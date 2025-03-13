@@ -59,6 +59,45 @@
           }
         ]
       }
+    },
+    "POST /api/articles/:article_id/comments": {
+      "description": "Responds with the posted comment",
+      "queries": ["commentBody", "article_id"],
+      "exampleResponse": {
+        "comment": [
+          {
+            "comment_id": 19,
+            "body": "this is a new comment",
+            "article_id": 1,
+            "author": "butter_bridge",
+            "votes": 0,
+            "created_at": "2024-11-26T18:27:24.315Z"
+          }
+        ]
+      }
+    },
+    "PATCH /api/articles/:article_id": {
+      "description": "Responds with patched article",
+      "queries": [],
+      "exampleResponse": {
+        "article": [
+          {
+            "article_id": 1,
+            "title": "Living in the shadow of a great man",
+            "topic": "mitch",
+            "author": "butter_bridge",
+            "body": "I find this existence challenging",
+            "created_at": "2020-07-09T20:11:00.000Z",
+            "votes": 101,
+            "article_img_url": "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
+          }
+        ]
+      }
+    },
+    "DELETE /api/comments/:comment_id": {
+      "description": "Deletes comment by id and responds with a 204 and no content",
+      "queries": [],
+      "exampleResponse": "204 - no content"
     }
   }
 }
