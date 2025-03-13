@@ -126,6 +126,43 @@ describe("GET /api/articles", () => {
         });
       });
   });
+  test("200: Responds with articles sorted in ascending order when specified", () => {
+    return request(app)
+      .get("/api/articles?sort_by=votes&order=asc")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.articles[0].votes).toBeLessThanOrEqual(
+          body.articles[1].votes
+        );
+      });
+  });
+  test("200: Responds with articles sorted by a specified column", () => {
+    return request(app)
+      .get("/api/articles?sort_by=votes")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.articles[0].votes).toBeGreaterThanOrEqual(
+          body.articles[1].votes
+        );
+      });
+  });
+  test("400: Responds with 'invalid column' when given an invalid sort_by column", () => {
+    return request(app)
+      .get("/api/articles?sort_by=invalid_column")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("invalid column");
+      });
+  });
+
+  test("400: Responds with 'invalid order' when given an invalid order", () => {
+    return request(app)
+      .get("/api/articles?order=invalid_order")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("invalid order");
+      });
+  });
 });
 
 describe("GET /api/articles/:article_id/comments", () => {
