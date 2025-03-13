@@ -1,6 +1,7 @@
 const {
   fetchCommentsFromArticleID,
   addCommentByID,
+  removeCommentById,
 } = require("../models/comments.models");
 
 exports.getCommentsFromArticleID = (request, response, next) => {
@@ -24,6 +25,21 @@ exports.postComment = (request, response, next) => {
   addCommentByID(commentBody, username, article_id)
     .then((comment) => {
       response.status(201).send({ comment });
+    })
+    .catch((err) => {
+      next(err);
+    });
+};
+
+exports.deleteComment = (request, response, next) => {
+  const { comment_id } = request.params;
+
+  removeCommentById(comment_id)
+    .then((deleteResult) => {
+      if (deleteResult.rowCount === 0) {
+        return response.status(404).send({ msg: "comment not found" });
+      }
+      response.status(204).send();
     })
     .catch((err) => {
       next(err);

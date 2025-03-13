@@ -16,6 +16,7 @@ const {
 const {
   getCommentsFromArticleID,
   postComment,
+  deleteComment,
 } = require("./controllers/comments.controllers");
 
 app.use(express.json());
@@ -33,6 +34,8 @@ app.get("/api/articles/:article_id/comments", getCommentsFromArticleID);
 app.post("/api/articles/:article_id/comments", postComment);
 
 app.patch("/api/articles/:article_id", patchArticleVotesByID);
+
+app.delete("/api/comments/:comment_id", deleteComment);
 
 app.all("/*", handleNonExistantEndpoint);
 
