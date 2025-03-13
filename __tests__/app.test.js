@@ -181,3 +181,169 @@ describe("GET /api/articles/:article_id/comments", () => {
       });
   });
 });
+
+describe("POST /api/articles/:article_id/comments", () => {
+  test("201: Responds with the posted comment", () => {
+    const newComment = {
+      username: "butter_bridge",
+      body: "Hello, this is a new comment",
+    };
+    return request(app)
+      .post("/api/articles/1/comments")
+      .send(newComment)
+      .expect(201)
+      .then(({ body }) => {
+        expect(body.comment).toEqual(
+          expect.objectContaining({
+            comment_id: expect.any(Number),
+            votes: expect.any(Number),
+            created_at: expect.any(String),
+            author: "butter_bridge",
+            body: "Hello, this is a new comment",
+            article_id: 1,
+          })
+        );
+      });
+  });
+  test("400: Responds with an error when request body is empty", () => {
+    return request(app)
+      .post("/api/articles/1/comments")
+      .send({})
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
+      });
+  });
+  test('400: Responds with an error when "username" is missing', () => {
+    const newComment = { body: "this is a new comment" };
+
+    return request(app)
+      .post("/api/articles/1/comments")
+      .send(newComment)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
+      });
+  });
+  test('400: Responds with an error when "body" is missing', () => {
+    const newComment = { username: "butter_bridge" };
+
+    return request(app)
+      .post("/api/articles/1/comments")
+      .send(newComment)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
+      });
+  });
+  test("400: Responds with 'Bad request' when given an invalid id", () => {
+    const newComment = {
+      username: "butter_bridge",
+      body: "Hello, this is a new comment",
+    };
+
+    return request(app)
+      .post("/api/articles/not-an-article/comments")
+      .send(newComment)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
+      });
+  });
+  test("404: Responds with 'article does not exist' when given a valid but non-existent article_id", () => {
+    const newComment = {
+      username: "butter_bridge",
+      body: "Hello, this is a new comment",
+    };
+
+    return request(app)
+      .post("/api/articles/88/comments")
+      .send(newComment)
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("article does not exist");
+      });
+  });
+});
+
+describe("PATCH /api/articles/:article_id", () => {
+  test("200: Responds with patched article", () => {
+    const updatedArticle = { inc_votes: 1 };
+
+    return request(app)
+      .patch("/api/articles/1")
+      .send(updatedArticle)
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.article).toEqual(
+          expect.objectContaining({
+            article_id: 1,
+            title: "Living in the shadow of a great man",
+            topic: "mitch",
+            author: "butter_bridge",
+            body: "I find this existence challenging",
+            created_at: expect.any(String),
+            votes: 101,
+            article_img_url:
+              "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+          })
+        );
+      });
+  });
+  test("200: Responds with patched article when a negative inc_votes value is provided", () => {
+    const newVote = { inc_votes: -10 };
+
+    return request(app)
+      .patch(`/api/articles/1`)
+      .send(newVote)
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.article).toEqual(
+          expect.objectContaining({
+            article_id: 1,
+            title: "Living in the shadow of a great man",
+            topic: "mitch",
+            author: "butter_bridge",
+            body: "I find this existence challenging",
+            created_at: expect.any(String),
+            votes: 90,
+            article_img_url:
+              "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+          })
+        );
+      });
+  });
+  test("404: Responds with 'article does not exist' if the article_id does not exist", () => {
+    const newVote = { inc_votes: 5 };
+
+    return request(app)
+      .patch(`/api/articles/88`)
+      .send(newVote)
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("article does not exist");
+      });
+  });
+  test("400:  Responds with 'Bad request' if the request body does not contain the inc_votes property", () => {
+    const newVote = {};
+
+    return request(app)
+      .patch(`/api/articles/1`)
+      .send(newVote)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
+      });
+  });
+  test("400: Responds with 'Bad request' if inc_votes is not a valid number", () => {
+    const invalidVote = { inc_votes: "invalid" };
+
+    return request(app)
+      .patch(`/api/articles/1`)
+      .send(invalidVote)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
+      });
+  });
+});
