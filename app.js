@@ -8,13 +8,17 @@ const { getTopics } = require("./controllers/topics.controllers");
 const {
   handleNonExistantEndpoint,
 } = require("./controllers/errors.controllers.js");
-const { getArticleByID } = require("./controllers/articles.controllers");
-const { getAllArticles } = require("./controllers/articles.controllers");
+const {
+  getArticleByID,
+  getAllArticles,
+  patchArticleVotesByID,
+} = require("./controllers/articles.controllers");
 const {
   getCommentsFromArticleID,
+  postComment,
 } = require("./controllers/comments.controllers");
 
-//app.use(express.json());
+app.use(express.json());
 
 app.get("/api", getEndpoints);
 
@@ -25,6 +29,10 @@ app.get("/api/articles/:article_id", getArticleByID);
 app.get("/api/articles", getAllArticles);
 
 app.get("/api/articles/:article_id/comments", getCommentsFromArticleID);
+
+app.post("/api/articles/:article_id/comments", postComment);
+
+app.patch("/api/articles/:article_id", patchArticleVotesByID);
 
 app.all("/*", handleNonExistantEndpoint);
 
@@ -41,7 +49,6 @@ app.use((err, request, response, next) => {
 });
 
 app.use((err, request, response, next) => {
-  console.log(err);
   response.status(500).send({ msg: "internal server error" });
 });
 
