@@ -17,23 +17,9 @@ exports.getArticleByID = (request, response, next) => {
 };
 
 exports.getAllArticles = (request, response, next) => {
-  const { sort_by = "created_at", order = "desc" } = request.query;
-  const validSortColumns = [
-    "article_id",
-    "created_at",
-    "title",
-    "votes",
-    "author",
-    "topic",
-  ];
-  if (!validSortColumns.includes(sort_by)) {
-    return response.status(400).send({ msg: "invalid column" });
-  }
-  if (order !== "asc" && order !== "desc") {
-    return response.status(400).send({ msg: "invalid order" });
-  }
+  const { sort_by = "created_at", order = "desc", topic } = request.query;
 
-  fetchAllArticles(sort_by, order)
+  fetchAllArticles(sort_by, order, topic)
     .then((articles) => {
       response.status(200).send({ articles });
     })
