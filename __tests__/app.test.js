@@ -4,6 +4,7 @@ const app = require("../app.js");
 const seed = require("../db/seeds/seed");
 const db = require("../db/connection");
 const data = require("../db/data/test-data");
+require("jest-sorted");
 
 beforeEach(() => {
   return seed(data);
@@ -66,6 +67,16 @@ describe("GET /api/topics", () => {
             article_img_url:
               "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
           });
+        });
+    });
+
+    test("200: Responds with article and comment_count", () => {
+      return request(app)
+        .get("/api/articles/1")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.article).toHaveProperty("comment_count");
+          expect(typeof body.article.comment_count).toBe("number");
         });
     });
     test("404: Responds with 'article does not exist' for a valid but non-existent ID", () => {
@@ -131,9 +142,7 @@ describe("GET /api/articles", () => {
       .get("/api/articles?sort_by=votes&order=asc")
       .expect(200)
       .then(({ body }) => {
-        expect(body.articles[0].votes).toBeLessThanOrEqual(
-          body.articles[1].votes
-        );
+        expect(body.articles).toBeSortedBy("votes", { descending: false });
       });
   });
   test("200: Responds with articles sorted by a specified column", () => {
@@ -141,26 +150,44 @@ describe("GET /api/articles", () => {
       .get("/api/articles?sort_by=votes")
       .expect(200)
       .then(({ body }) => {
-        expect(body.articles[0].votes).toBeGreaterThanOrEqual(
-          body.articles[1].votes
-        );
+        expect(body.articles).toBeSortedBy("votes", { descending: true });
       });
   });
-  test("400: Responds with 'invalid column' when given an invalid sort_by column", () => {
+  test("400: Responds with 'Bad request' when given an invalid sort_by column", () => {
     return request(app)
       .get("/api/articles?sort_by=invalid_column")
       .expect(400)
       .then(({ body }) => {
-        expect(body.msg).toBe("invalid column");
+        expect(body.msg).toBe("Bad request");
       });
   });
 
-  test("400: Responds with 'invalid order' when given an invalid order", () => {
+  test("400: Responds with 'Bad request' when given an invalid order", () => {
     return request(app)
       .get("/api/articles?order=invalid_order")
       .expect(400)
       .then(({ body }) => {
-        expect(body.msg).toBe("invalid order");
+        expect(body.msg).toBe("Bad request");
+      });
+  });
+
+  test("200: Responds with articles filtered by topic", () => {
+    return request(app)
+      .get("/api/articles?topic=mitch")
+      .expect(200)
+      .then(({ body }) => {
+        body.articles.forEach((article) => {
+          expect(article.topic).toBe("mitch");
+        });
+      });
+  });
+
+  test("400: Responds with 'Bad request' for an invalid topic query", () => {
+    return request(app)
+      .get("/api/articles?topic=12345")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
       });
   });
 });
@@ -190,7 +217,9 @@ describe("GET /api/articles/:article_id/comments", () => {
       .get("/api/articles/1/comments")
       .expect(200)
       .then(({ body }) => {
-        expect(body.comments).toBeSortedBy("created_at", { descending: true });
+        expect(body.comments).toBeSortedBy("created_at", {
+          descending: true,
+        });
       });
   });
   test("200: Responds with an empty array when there are no comments", () => {
