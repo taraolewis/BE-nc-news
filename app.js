@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const db = require("./db/connection");
 const endpoints = require("./endpoints.json");
+const cors = require("cors");
 
 const { getEndpoints } = require("./controllers/api.controllers");
 const { getTopics } = require("./controllers/topics.controllers");
@@ -20,6 +21,8 @@ const {
 } = require("./controllers/comments.controllers");
 
 const { getAllUsers } = require("./controllers/users.controllers");
+
+app.use(cors());
 
 app.use(express.json());
 
